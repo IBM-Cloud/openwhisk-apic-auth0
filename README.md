@@ -18,6 +18,8 @@ No runtime to deploy, no server to manage :)
 
 ## Deploying the application to Bluemix
 
+### Deploy the OpenWhisk actions
+
 1. Clone or fork the repository https://github.com/IBM-Bluemix/openwhisk-apic-auth0
 
 1. Checkout the code
@@ -36,6 +38,8 @@ No runtime to deploy, no server to manage :)
    ./deploy.sh --install
    ```
 
+### Import the API in API Connect
+
 1. Create an API Connect service in Bluemix
 
 1. Under Drafts, select APIs
@@ -46,17 +50,23 @@ No runtime to deploy, no server to manage :)
 
 1. Click Import
 
+### Configure API properties
+
 1. Select Properties
 
 1. Fill in the Auth0 ID and OpenWhisk credentials
 
 1. Save
 
+### Publish the API
+
 1. Select "Generate a default product"
 
 1. Click Create product
 
 1. Wait a minute or so
+
+### Test the API
 
 1. Access the GET /pets endpoint
 
