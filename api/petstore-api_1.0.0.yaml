@@ -1,0 +1,122 @@
+swagger: '2.0'
+info:
+  title: Petstore API
+  version: 1.0.0
+  x-ibm-name: petstore-api
+host: $(catalog.host)
+schemes:
+  - https
+basePath: /petstore/v1
+produces:
+  - application/json
+paths:
+  /pets:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    post:
+      responses:
+        '200':
+          description: 200 OK
+x-ibm-configuration:
+  enforced: true
+  testable: true
+  phase: realized
+  cors:
+    enabled: true
+  assembly:
+    execute:
+      - invoke:
+          title: retrieve JWK keys
+          timeout: 60
+          verb: GET
+          cache-response: time-to-live
+          cache-ttl: 900
+          version: 1.0.0
+          target-url: 'https://$(auth0Id).auth0.com/.well-known/jwks.json'
+          output: rsa256-key
+      - gatewayscript:
+          title: extract JWK key
+          version: 1.0.0
+          source: |
+            var rsa256Key = apim.getvariable('rsa256-key');
+            apim.setvariable('jwk-key', JSON.stringify(rsa256Key.body.keys[0]));
+      - jwt-validate:
+          title: validate JWT
+          jwt: request.headers.authorization
+          output-claims: decoded.claims
+          version: 1.0.0
+          iss-claim: ".*.auth0.com\\/"
+          aud-claim: '.*.apiconnect.com'
+          jws-jwk: jwk-key
+      - gatewayscript:
+          title: add JWT to body
+          version: 1.0.0
+          source: |
+            var body = apim.getvariable('message.body') || {};
+            body.jwt = {
+              authorization: apim.getvariable('request.headers.authorization'),
+              verifiedToken: JSON.parse(apim.getvariable('decoded.claims'))
+            };
+            apim.setvariable('message.body', body);
+      - operation-switch:
+          title: operation-switch
+          case:
+            - operations:
+                - verb: get
+                  path: /pets
+              execute:
+                - invoke:
+                    title: call getPets
+                    timeout: 60
+                    verb: POST
+                    cache-response: protocol
+                    cache-ttl: 900
+                    version: 1.0.0
+                    target-url: 'https://openwhisk.ng.bluemix.net/api/v1/namespaces/_/actions/petstore/getPets?blocking=true'
+                    username: $(openwhiskUsername)
+                    password: $(openwhiskPassword)
+                    output: invoke_result
+            - operations:
+                - verb: post
+                  path: /pets
+              execute:
+                - invoke:
+                    title: call postPet
+                    timeout: 60
+                    verb: POST
+                    cache-response: protocol
+                    cache-ttl: 900
+                    version: 1.0.0
+                    target-url: 'https://openwhisk.ng.bluemix.net/api/v1/namespaces/_/actions/petstore/postPet?blocking=true'
+                    username: $(openwhiskUsername)
+                    password: $(openwhiskPassword)
+                    output: invoke_result
+          otherwise: []
+          version: 1.0.0
+      - gatewayscript:
+          title: extract result
+          version: 1.0.0
+          source: |
+            apim.setvariable('message.body', apim.getvariable('invoke_result').body.response.result);
+    catch: []
+  gateway: datapower-gateway
+  properties:
+    auth0Id:
+      value: ''
+      description: The Auth0 account under which you have defined an API.
+      encoded: false
+    openwhiskUsername:
+      value: ''
+      description: 'Your OpenWhisk username. It can be obtained by looking at the output of  "wsk property get --auth". It is the part before the semi-colon.'
+      encoded: false
+    openwhiskPassword:
+      value: ''
+      description: 'Your OpenWhisk password. It can be obtained by looking at the output of "wsk property get --auth". It is the part after the semi-colon.'
+      encoded: false
+  catalogs: {}
+consumes:
+  - application/json
+securityDefinitions: {}
+security: []
