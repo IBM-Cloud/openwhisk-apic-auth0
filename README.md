@@ -4,7 +4,7 @@ WORK IN PROGRESS
 
 ## Overview
 
-Built using the IBM Bluemix, the application uses:
+Built using the IBM Bluemix, the project uses:
 * IBM Bluemix OpenWhisk to implement the backend API
 * API Connect to expose the API
 * [Auth0](https://auth0.com/) to secure the API
@@ -38,19 +38,63 @@ No runtime to deploy, no server to manage :)
 
 1. Create an API Connect service in Bluemix
 
-1. Import the API definition
+1. Under Drafts, select APIs
+
+1. Select Import API from a file or URL
+
+1. Point to api/petstore-api_1.0.0.yaml
+
+1. Click Import
+
+1. Select Properties
 
 1. Fill in the Auth0 ID and OpenWhisk credentials
 
-1. Publish the API definition into a new product
+1. Save
 
-1. Access the GET /pets endpoint -> it fails
+1. Select "Generate a default product"
 
-1. Obtain a Auth0 access token
+1. Click Create product
 
-1. Access the GET /pets endpoint with the token -> it works
+1. Wait a minute or so
 
-1. Access the POST /pets endpoint with the token -> it works
+1. Access the GET /pets endpoint
+
+   ```
+   curl -v -H "Content-Type: application/json" https://api.us.apiconnect.ibmcloud.com/<org>-<space>/sb/petstore/v1/pets
+   ```
+
+1. It fails with `JWT validation failed`
+
+1. Obtain a Auth0 access token from Auth0 UI or using curl
+
+   ```
+   curl --request POST   --url https://<your_auth0_id>.auth0.com/oauth/token   --header 'content-type: application/json'   --data '{"client_id":"<your_client_id>","client_secret":"<your_client_secret>","audience":"https://<your_auth0_id>.apiconnect.com","grant_type":"client_credentials"}'
+   ```
+
+1. Access the GET /pets endpoint with the token
+
+   ```
+   curl -v -H "Authorization: Bearer <access_token>" -H "Content-Type: application/json" https://api.us.apiconnect.ibmcloud.com/<org>-<space>/sb/petstore/v1/pets
+   ```
+
+1. It returns pets
+
+   ```
+   {"pets":[{"id":90720,"name":"brownie"},{"id":456,"name":"doggie"},{"id":1968,"name":"Brady"},{"id":654646,"name":"doggie"}]}
+   ```
+
+1. Access the POST /pets endpoint with the token
+
+   ```
+   curl -v -X POST --data '{"name": "titus"}' -H "Authorization: Bearer <access_token>" -H "Content-Type: application/json" https://api.us.apiconnect.ibmcloud.com/<org>-<space>/sb/petstore/v1/pets
+   ```
+
+1. It adds a new pet
+
+   ```
+   {"id":1502210136538,"name":"titus"}
+   ```
 
 ## Code Structure
 
