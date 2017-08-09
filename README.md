@@ -1,6 +1,6 @@
 # Expose Auth0-enabled OpenWhisk actions with API Connect
 
-WORK IN PROGRESS
+This project looks at how <a href="https://console.bluemix.net/catalog/services/APIConnect">API Connect</a> can be used to expose OpenWhisk actions while integrating with a third-party identity platform like <a href="https://auth0.com/">Auth0</a> to secure the API.
 
 ## Overview
 
@@ -9,7 +9,14 @@ Built using the IBM Bluemix, the project uses:
 * API Connect to expose the API
 * [Auth0](https://auth0.com/) to secure the API
 
-No runtime to deploy, no server to manage :)
+The API defines two methods `GET /pets` and `POST /pets` to retrieve a list of pets and add one. The methods are implemented as [OpenWhisk actions](./actions).
+
+When calling the API, the user passes the token obtained from Auth0 as Authorization header.
+
+In API Connect, the JWK keys to verify the token are retrieved from Auth0 - and cached. Then the token is validated and the call to OpenWhisk can be made. The OpenWhisk action result is returned.
+
+   ![](./xdocs/apic-flow.png)
+
 
 ## Application Requirements
 
@@ -167,14 +174,19 @@ No runtime to deploy, no server to manage :)
 | File | Description |
 | ---- | ----------- |
 |[**api/petstore-api_1.0.0.yaml**](api/petstore-api_1.0.0.yaml)| API definition for API Connect. |
+|[**actions**](actions)|GET and POST implementation. As there is no database, the implementation is only a mock.|
 |[**deploy.sh**](deploy.sh)|Helper script to install, uninstall, update the OpenWhisk actions used by the application.|
 
 ## License
 
 See [License.txt](License.txt) for license information.
 
+## Credits
+
+Credits to <a href="https://www.linkedin.com/in/ozairsheikh/">Ozair Sheikh</a> for his article on <a href="https://developer.ibm.com/apiconnect/2017/06/16/protect-access-to-api-services-with-auth0-jwt/">protecting access to API services using Auth0</a> and <a href="https://twitter.com/thomasj">James Thomas</a> for his instructions <a href="http://jamesthom.as/blog/2016/04/26/serverless-apis-with-openwhisk-and-api-connect/">to expose OpenWhisk actions with API Connect</a>.
+
 ---
 
-This project is a sample application created for the purpose of demonstrating a serverless app with OpenWhisk. The program is provided as-is with no warranties of any kind, express or implied.
+This project is a sample application. The program is provided as-is with no warranties of any kind, express or implied.
 
 [bluemix_signup_url]: https://console.ng.bluemix.net/?cm_mmc=GitHubReadMe
