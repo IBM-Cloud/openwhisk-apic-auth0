@@ -18,6 +18,48 @@ No runtime to deploy, no server to manage :)
 
 ## Deploying the application to Bluemix
 
+### Configure Auth0
+
+1. Log in your Auth0 account
+
+1. Select Clients
+
+   ![](./xdocs/auth0-create-client.png)
+
+1. Create a new client
+   * Set the name to Petstore client
+   * Select Non Interactive Clients
+
+   ![](./xdocs/auth0-create-client-dialog.png)
+
+1. Select the APIs link
+
+   ![](./xdocs/auth0-apis.png)
+
+1. Click Create API
+
+1. Fill in the details
+   * Set name to Petstore
+   * Set identifier to https://petstore.apiconnect.com
+
+   ![](./xdocs/auth0-create-api.png)
+
+1. Click Create
+
+   ![](./xdocs/auth0-create-api.png)
+
+1. In the Scopes section create new scopes called read and write and add a description.
+
+   ![](./xdocs/auth0-create-scopes.png)
+
+1. In the Non Interactive Clients section, expand the Petstore Client and select the previously created scopes and click Update. Click Continue to accept the warning message.
+
+   ![](./xdocs/auth0-authorize-client.png)
+
+1. In the Test section, you can either copy and paste the curl command or keep the page open. Later we will use this sample access_token that has been generated there.
+
+   ![](./xdocs/auth0-test-client.png)
+
 ### Deploy the OpenWhisk actions
 
 1. Clone or fork the repository https://github.com/IBM-Bluemix/openwhisk-apic-auth0
@@ -44,9 +86,15 @@ No runtime to deploy, no server to manage :)
 
 1. Under Drafts, select APIs
 
+   ![](./xdocs/apic-select-drafts.png)
+
 1. Select Import API from a file or URL
 
+   ![](./xdocs/apic-select-import.png)
+
 1. Point to api/petstore-api_1.0.0.yaml
+
+   ![](./xdocs/apic-select-petstore-api.png)
 
 1. Click Import
 
@@ -54,7 +102,11 @@ No runtime to deploy, no server to manage :)
 
 1. Select Properties
 
-1. Fill in the Auth0 ID and OpenWhisk credentials
+   ![](./xdocs/apic-select-properties.png)
+
+1. Fill in the Auth0 ID and OpenWhisk credentials by setting a default value for auth0Id, openwhiskUsername and openwhiskPassword
+
+   ![](./xdocs/apic-set-properties.png)
 
 1. Save
 
@@ -62,27 +114,31 @@ No runtime to deploy, no server to manage :)
 
 1. Select "Generate a default product"
 
-1. Click Create product
+   ![](./xdocs/apic-generate-default-product.png)
 
-1. Wait a minute or so
+1. Leave the defaults and click Create product
+
+1. Wait a minute or so for the API to be published to the Sandbox
 
 ### Test the API
 
-1. Access the GET /pets endpoint
+1. Retrieve your API Connect endpoint under Dashboard / Settings / Gateways
+
+   ![](./xdocs/apic-endpoint.png)
+
+1. Access the `GET /pets` endpoint
 
    ```
    curl -v -H "Content-Type: application/json" https://api.us.apiconnect.ibmcloud.com/<org>-<space>/sb/petstore/v1/pets
    ```
 
-1. It fails with `JWT validation failed`
-
-1. Obtain a Auth0 access token from Auth0 UI or using curl
+1. As expected, it fails with `JWT validation failed` as we did not specified a valid OAuth token to validate our access:
 
    ```
-   curl --request POST   --url https://<your_auth0_id>.auth0.com/oauth/token   --header 'content-type: application/json'   --data '{"client_id":"<your_client_id>","client_secret":"<your_client_secret>","audience":"https://<your_auth0_id>.apiconnect.com","grant_type":"client_credentials"}'
+   { "httpCode":"500", "httpMessage":"Invalid-JWT-Validate", "moreInformation":"JWT validation failed" }
    ```
 
-1. Access the GET /pets endpoint with the token
+1. Call the API again but this time passing the access_token obtained in the Test section of Auth0 in a previous step
 
    ```
    curl -v -H "Authorization: Bearer <access_token>" -H "Content-Type: application/json" https://api.us.apiconnect.ibmcloud.com/<org>-<space>/sb/petstore/v1/pets
