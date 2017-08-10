@@ -54,8 +54,6 @@ In API Connect, the JWK keys to verify the token are retrieved from Auth0 - and 
 
 1. Click Create
 
-   ![](./xdocs/auth0-create-api.png)
-
 1. In the Scopes section create new scopes called read and write and add a description.
 
    ![](./xdocs/auth0-create-scopes.png)
