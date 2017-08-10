@@ -48,6 +48,7 @@ In API Connect, the JWK keys to verify the token are retrieved from Auth0 - and 
 1. Fill in the details
    * Set name to Petstore
    * Set identifier to https://petstore.apiconnect.com
+   * Set algorithm to RS256
 
    ![](./xdocs/auth0-create-api.png)
 
