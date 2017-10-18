@@ -138,7 +138,7 @@ In API Connect, the JWK keys to verify the token are retrieved from Auth0 - and 
    curl -v -H "Content-Type: application/json" https://api.us.apiconnect.ibmcloud.com/<org>-<space>/sb/petstore/v1/pets
    ```
 
-1. As expected, it fails with `JWT validation failed` as we did not specified a valid OAuth token to validate our access:
+1. As expected, it fails with `JWT validation failed` as we did not specified a valid token to validate our access:
 
    ```
    { "httpCode":"500", "httpMessage":"Invalid-JWT-Validate", "moreInformation":"JWT validation failed" }
